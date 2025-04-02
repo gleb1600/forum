@@ -5,35 +5,16 @@
 - Иерархические комментарии под постами
 - Возможность разрешить/запретить комментирование поста
 - Rеaltime-обновления через GraphQL Subscriptions
+- Запуск через docker-compose, работа с образом postgres
 - Поддержка двух хранилищ: In-Memory и PostgreSQL
 
 ## Работа
-### Если хотите использовать PostgreSQL начинайте с пункта 1
-### Если хотите внутреннюю память начинайте с пункта 5
 
-1. **Установите PostgreSQL локально**:
-
-https://www.postgresql.org/download/
-
-2. **Откройте "SQL Shell (psql) и введите пароль от postgres"**
-```psql
-Server [localhost]: 
-Database [postgres]: 
-Port [5432]: 
-Username [postgres]: 
-Пароль: ваш пароль от postgres
-```
-3. **В psql создайте пользователя 'garden' с паролем 'secret' и БД 'gardendb'**:
-```sql
-CREATE USER forum WITH PASSWORD 'secret';
-CREATE DATABASE forumdb OWNER forum;
-\q
-```
-4. **Откройте PowerShell и выполните миграцию и инициализацию данных**:
+1. **Запуск**:
 ```bash
-& 'C:\Program Files\PostgreSQL\17\bin\psql.exe' -U forum -d forumdb -f migrations\001.up.sql
+docker-compose up -d
 ```
-5. **Запустите с флагом -storage**:
+2. **Запустите с флагом -storage**:
 
 Для хранения данных в памяти:
 ```bash
@@ -43,7 +24,7 @@ go run main.go -storage memory
 ```bash
 go run main.go -storage postgres
 ```
-6. **Перейдите на http://localhost:8080/**:
+3. **Перейдите на http://localhost:8080/**:
 
 Для создания поста:
 ```graphql
@@ -58,10 +39,10 @@ mutation createPost {
     )
     {
         id
-	    title
-	    content
+	title
+	content
         author
-	    createdAt
+	createdAt
         commentsEnabled
     }
 }
@@ -74,10 +55,10 @@ query findPost {
     )
 	{
         id
-	    title
-	    content
+	title
+	content
         author
-	    createdAt
+	createdAt
         commentsEnabled
 	}
 }
@@ -91,10 +72,10 @@ query findPosts {
     )
     {
         id
-	    title
-	    content
+	title
+	content
         author
-	    createdAt
+	createdAt
         commentsEnabled
 	}
 }
@@ -127,7 +108,7 @@ query findComments {
     )
 	{
         post{
-            id
+            	id
     	  	title
     	  	content
         	author
@@ -135,7 +116,7 @@ query findComments {
         	commentsEnabled
         }
         comments{
-            id
+            	id
         	postId
         	parentId
         	content
@@ -187,12 +168,11 @@ forum
     │   │   ├── memory               # In-memory хранилище
     │   │   │   └── memory.go
     │   │   ├── postgres             # PostgreSQL хранилище
-    │   │   │   ├── migrations       # Миграции
-    │   │   │   │   └── 001.up.sql
     │   │   │   └── postgres.go
     │   │   └── storage.go           # Интерфейсы хранилищ
     │   ├── gqlgen.yml
-    │   └── tools.go  
+    │   └── tools.go
+    ├── docker-compose.yml 
     ├── go.mod
     ├── go.sum
     └── main.go                      # Точка входа
