@@ -1,0 +1,14 @@
+version: '3'
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: forum_user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: forumdb
+    ports:
+      - "5431:5432"
+    volumes:
+      - ./docker-entrypoint-initdb.d/init.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  postgres-data:

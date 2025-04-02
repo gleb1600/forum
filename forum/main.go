@@ -44,7 +44,7 @@ func main() {
 		store = mmrstorage.NewMemoryStorage()
 		log.Println("Using in-memory storage")
 	case "postgres":
-		dsn = "postgres://forum:secret@127.0.0.1:5432/forumdb?sslmode=disable"
+		dsn = "postgres://forum_user:secret@localhost:5431/forumdb?sslmode=disable"
 		store = pgstorage.NewPostgresStorage(dsn)
 		log.Println("Using PostgreSQL storage")
 	default:
