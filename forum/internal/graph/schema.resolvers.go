@@ -6,17 +6,15 @@ package graph
 
 import (
 	"context"
-	"crypto/rand"
-	"fmt"
 	"forum/internal/graph/model"
-	"math/big"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input model.NewPost) (*model.Post, error) {
-	randNumber, _ := rand.Int(rand.Reader, big.NewInt(99))
 	post := &model.Post{
-		ID:              fmt.Sprintf("id-%d", randNumber),
+		ID:              uuid.NewString(),
 		Title:           input.Title,
 		Content:         input.Content,
 		Author:          input.Author,
@@ -39,9 +37,8 @@ func (r *mutationResolver) DisableComments(ctx context.Context, postID string) (
 }
 
 func (r *mutationResolver) CreateComment(ctx context.Context, input model.NewComment) (*model.Comment, error) {
-	randNumber, _ := rand.Int(rand.Reader, big.NewInt(99))
 	comment := &model.Comment{
-		ID:        fmt.Sprintf("%s-%d", input.PostID, randNumber),
+		ID:        uuid.NewString(),
 		PostID:    input.PostID,
 		ParentID:  input.ParentID,
 		Author:    input.Author,
@@ -85,7 +82,7 @@ func (r *queryResolver) Comments(ctx context.Context, postID string, limit int32
 	if err != nil {
 		return nil, err
 	}
-	comments, err := r.ResolverStorage.GetCommentsByPost(ctx, postID, 0, 0)
+	comments, err := r.ResolverStorage.GetCommentsByPost(ctx, postID, int(limit), int(offset))
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +90,7 @@ func (r *queryResolver) Comments(ctx context.Context, postID string, limit int32
 }
 
 func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID string) (<-chan *model.Comment, error) {
-	randNumber, _ := rand.Int(rand.Reader, big.NewInt(99))
-	idNum := fmt.Sprintf("sub-%d", randNumber)
+	idNum := uuid.NewString()
 	idString := [2]string{idNum, postID}
 	msgs := make(chan *model.Comment, 1)
 	go func() {

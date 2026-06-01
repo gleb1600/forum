@@ -48,8 +48,7 @@ func main() {
 		store = pgstorage.NewPostgresStorage(dsn)
 		log.Println("Using PostgreSQL storage")
 	default:
-		log.Fatalf("Unknown storage type: %s", storageType)
-		log.Fatalf("Storage type (memory|postgres)")
+		log.Fatalf("Unknown storage type: %s \nStorage type (memory|postgres)", storageType)
 	}
 
 	rslvr := &graph.Resolver{ResolverStorage: store, SubStorage: subStore}
