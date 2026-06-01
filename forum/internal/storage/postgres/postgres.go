@@ -120,14 +120,19 @@ func (p *postgresStorage) CreateComment(ctx context.Context, comment *model.Comm
 }
 
 func (p *postgresStorage) GetCommentsByPost(ctx context.Context, postID string, limit, offset int) ([]*model.Comment, error) {
+	var exists bool
+	err := p.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM posts WHERE id = $1)`, postID).Scan(&exists)
+	if err != nil || !exists {
+		return nil, ErrPostNotFound
+	}
 
 	rows, err := p.pool.Query(ctx,
-		`SELECT id, post_id, parent_id, content, author, created_at 
+		`SELECT id, post_id, parent_id, content, author, created_at
 		FROM comments WHERE post_id = $1 ORDER BY created_at LIMIT $2 OFFSET $3`,
 		postID, limit, offset)
 
 	if err != nil {
-		return nil, ErrPostNotFound
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -144,11 +149,14 @@ func (p *postgresStorage) GetCommentsByPost(ctx context.Context, postID string, 
 }
 
 func (p *postgresStorage) DisableComments(ctx context.Context, postID string) error {
-	_, err := p.pool.Exec(ctx,
+	result, err := p.pool.Exec(ctx,
 		`UPDATE posts SET comments_enabled = $1 WHERE id = $2`,
 		false, postID)
 	if err != nil {
 		return err
+	}
+	if result.RowsAffected() == 0 {
+		return ErrPostNotFound
 	}
 	return nil
 }

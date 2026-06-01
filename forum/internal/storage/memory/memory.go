@@ -54,12 +54,10 @@ func (m *memoryStorage) ListPosts(ctx context.Context, limit, offset int) ([]*mo
 
 	m.postsMutex.RLock()
 	for _, v := range m.posts {
-		if limit < 1 {
+		if limit > 0 && len(posts) >= limit {
 			break
 		}
-
 		posts = append(posts, v)
-		limit--
 	}
 	m.postsMutex.RUnlock()
 
@@ -109,12 +107,11 @@ func (m *memoryStorage) GetCommentsByPost(ctx context.Context, postID string, li
 	m.commentsMutex.RLock()
 
 	for _, v := range m.comments {
-		if limit < 1 {
+		if limit > 0 && len(comments) >= limit {
 			break
 		}
 		if v.PostID == postID {
 			comments = append(comments, v)
-			limit--
 		}
 	}
 
